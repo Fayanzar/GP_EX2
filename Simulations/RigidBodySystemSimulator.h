@@ -1,10 +1,37 @@
 #ifndef RIGIDBODYSYSTEMSIMULATOR_h
 #define RIGIDBODYSYSTEMSIMULATOR_h
 #include "Simulator.h"
-//add your header for your rigid body system, for e.g.,
-//#include "rigidBodySystem.h" 
+#include <vector>
 
 #define TESTCASEUSEDTORUNTEST 2
+
+struct RigidBody {
+	RigidBody(float m, Vec3 vel, Vec3 tr, Vec3 rot, Vec3 sc) {
+		mass = m;
+		velocity = vel;
+		translatMat.initTranslation(tr.X, tr.Y, tr.Z);
+		rotMat.initRotationXYZ(rot.X, rot.Y, rot.Z);
+		scaleMat.initScaling(sc.X, sc.Y, sc.Z);
+		invTensor = Mat4(12. / m / (sc.Y * sc.Y + sc.Z * sc.Z), 0, 0, 0,
+			0, 12. / m / (sc.X * sc.X + sc.Z * sc.Z), 0, 0,
+			0, 0, 12. / m / (sc.X * sc.X + sc.Y * sc.Y), 0,
+			0, 0, 0, 1);
+		L = Vec3(0, 0, 0);
+		F = Vec3(0, 0, 0);
+		q = Vec3(0, 0, 0);
+		w = Vec3(0, 0, 0);
+	}
+	float mass;
+	Vec3 velocity;
+	Vec3 w;
+	Vec3 L;
+	Vec3 F;
+	Vec3 q;
+	Mat4 translatMat;
+	Mat4 rotMat;
+	Mat4 scaleMat;
+	Mat4 invTensor;
+};
 
 class RigidBodySystemSimulator:public Simulator{
 public:
@@ -29,13 +56,11 @@ public:
 	Vec3 getAngularVelocityOfRigidBody(int i);
 	void applyForceOnBody(int i, Vec3 loc, Vec3 force);
 	void addRigidBody(Vec3 position, Vec3 size, int mass);
-	void setOrientationOf(int i,Quat orientation);
+	void setOrientationOf(int i, Quat orientation);
 	void setVelocityOf(int i, Vec3 velocity);
 
 private:
-	// Attributes
-	// add your RigidBodySystem data members, for e.g.,
-	// RigidBodySystem * m_pRigidBodySystem; 
+	vector<RigidBody> rigidBodies;
 	Vec3 m_externalForce;
 
 	// UI Attributes
