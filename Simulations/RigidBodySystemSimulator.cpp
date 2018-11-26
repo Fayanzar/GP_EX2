@@ -5,6 +5,8 @@ RigidBodySystemSimulator::RigidBodySystemSimulator() {
 	rigidBodies.push_back(rb);
 	
 	applyForceOnBody(0, Vec3(0.3, 0.5, 0.25), Vec3(1, 1, 0));
+	extPoint = Vec3(0, 0, 0);
+	extForce = Vec3(0, 0, 0);
 }
 
 const char * RigidBodySystemSimulator::getTestCasesStr() {
@@ -38,6 +40,33 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 
 void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed)
 {
+	Point2D mouseDiff;
+	mouseDiff.x = m_trackmouse.x - m_oldtrackmouse.x;
+	mouseDiff.y = m_trackmouse.y - m_oldtrackmouse.y;
+	if (mouseDiff.x != 0 || mouseDiff.y != 0)
+	{
+		Mat4 worldViewInv = Mat4(DUC->g_camera.GetWorldMatrix() * DUC->g_camera.GetViewMatrix());
+		worldViewInv = worldViewInv.inverse();
+		Vec3 inputView = Vec3((float)mouseDiff.x, (float)-mouseDiff.y, 0);
+
+		Vec3 point = Vec3((float)m_trackmouse.x, -(float)m_trackmouse.y, 0);
+		Vec3 pointWorld = worldViewInv.transformVectorNormal(point);
+
+		Vec3 inputWorld = worldViewInv.transformVectorNormal(inputView);
+		// find a proper scale!
+		float inputScale = 0.05f;
+		inputWorld = inputWorld * inputScale;
+		extForce = inputWorld;
+		extPoint = pointWorld;
+	}
+	else {
+		if (extForce.X != 0 || extForce.Y != 0 || extForce.Z != 0) {
+			applyForceOnBody(0, getPositionOfRigidBody(0), extForce);
+			cout << extForce << endl;
+		}
+		extPoint = Vec3(0, 0, 0);
+		extForce = Vec3(0, 0, 0);
+	}
 }
 
 void RigidBodySystemSimulator::simulateTimestep(float timeStep)
@@ -69,30 +98,37 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 
 void RigidBodySystemSimulator::onClick(int x, int y)
 {
+	m_trackmouse.x = x;
+	m_trackmouse.y = y;
 }
 
 void RigidBodySystemSimulator::onMouse(int x, int y)
 {
+	m_oldtrackmouse.x = x;
+	m_oldtrackmouse.y = y;
+	m_trackmouse.x = x;
+	m_trackmouse.y = y;
 }
 
 int RigidBodySystemSimulator::getNumberOfRigidBodies()
 {
-	return 0;
+	return rigidBodies.size();
 }
 
 Vec3 RigidBodySystemSimulator::getPositionOfRigidBody(int i)
 {
-	return Vec3();
+	RigidBody body = rigidBodies.at(i);
+	return Vec3(body.translatMat.value[0][3], body.translatMat.value[1][3], body.translatMat.value[0][3]);
 }
 
 Vec3 RigidBodySystemSimulator::getLinearVelocityOfRigidBody(int i)
 {
-	return Vec3();
+	return rigidBodies.at(i).velocity;
 }
 
 Vec3 RigidBodySystemSimulator::getAngularVelocityOfRigidBody(int i)
 {
-	return Vec3();
+	return rigidBodies.at(i).w;
 }
 
 void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
@@ -104,12 +140,16 @@ void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
 
 void RigidBodySystemSimulator::addRigidBody(Vec3 position, Vec3 size, int mass)
 {
+	RigidBody body = RigidBody(mass, Vec3(0, 0, 0), position, Vec3(0, 0, 0), size);
+	rigidBodies.push_back(body);
 }
 
 void RigidBodySystemSimulator::setOrientationOf(int i, Quat orientation)
 {
+	rigidBodies.at(i).rotMat = orientation.getRotMat();
 }
 
 void RigidBodySystemSimulator::setVelocityOf(int i, Vec3 velocity)
 {
+	rigidBodies.at(i).velocity = velocity;
 }

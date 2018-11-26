@@ -63,6 +63,9 @@ private:
 	vector<RigidBody> rigidBodies;
 	Vec3 m_externalForce;
 
+	Vec3 extForce;
+	Vec3 extPoint;
+
 	// UI Attributes
 	Point2D m_mouse;
 	Point2D m_trackmouse;
