@@ -1,6 +1,7 @@
 #ifndef RIGIDBODYSYSTEMSIMULATOR_h
 #define RIGIDBODYSYSTEMSIMULATOR_h
 #include "Simulator.h"
+#include "collisionDetect.h"
 #include <vector>
 
 #define TESTCASEUSEDTORUNTEST 2
@@ -58,6 +59,9 @@ public:
 	void addRigidBody(Vec3 position, Vec3 size, int mass);
 	void setOrientationOf(int i, Quat orientation);
 	void setVelocityOf(int i, Vec3 velocity);
+	void EulerStep(int i, float timeStep);
+	void resolveCollision(int i, int j);
+	void resolveCollision(int i, Mat4 &wall);
 
 private:
 	vector<RigidBody> rigidBodies;

@@ -1,15 +1,17 @@
 ﻿// header file:
 #include <DirectXMath.h>
 #include <Vector>
+#include "util/vectorbase.h"
+#include "util/matrixbase.h"
 using namespace DirectX;
-
+using namespace GamePhysics;
 // the return structure, with these values, you should be able to calculate the impulse
 // the depth shouldn't be used in your impulse calculation, it is a redundant value
 // if the normalWorld == XMVectorZero(), no collision
 struct CollisionInfo{
 	bool isValid;                          // whether there is a collision point, true for yes
-	GamePhysics::Vec3 collisionPointWorld; // the position of the collision point in world space
-	GamePhysics::Vec3 normalWorld;         // the direction of the impulse to A, negative of the collision face of A
+	Vec3 collisionPointWorld; // the position of the collision point in world space
+	Vec3 normalWorld;         // the direction of the impulse to A, negative of the collision face of A
 	float depth;                           // the distance of the collision point to the surface, not necessary.
 };
 
@@ -390,7 +392,7 @@ namespace collisionTools{
 obj2World_A, the transfer matrix from object space of A to the world space
 obj2World_B, the transfer matrix from object space of B to the world space
 */
-inline CollisionInfo checkCollisionSAT(GamePhysics::Mat4& obj2World_A, GamePhysics::Mat4& obj2World_B) {
+inline CollisionInfo checkCollisionSAT(Mat4& obj2World_A, Mat4& obj2World_B) {
 	using namespace collisionTools;
 	XMMATRIX MatA = obj2World_A.toDirectXMatrix(), MatB = obj2World_B.toDirectXMatrix();
 	XMVECTOR calSizeA = getBoxSize(MatA);
